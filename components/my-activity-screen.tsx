@@ -13,8 +13,8 @@ import {
   AlertCircle,
   XCircle,
   Users,
-  MessageCircle,
   Navigation,
+  Phone,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,6 +25,7 @@ import { toast } from "@/hooks/use-toast"
 import { CheckInModal } from "@/components/check-in-modal"
 import { ScheduleManager } from "@/components/schedule-manager"
 import { EditPostingModal } from "@/components/edit-posting-modal"
+import { ContactSystem } from "@/components/contact-system"
 
 interface JobActivity {
   id: string
@@ -35,7 +36,8 @@ interface JobActivity {
   startTime?: string
   endTime?: string
   duration: string
-  pay: string
+  totalPay: number
+  workTime: string
   location: string
   rating?: number
   review?: string
@@ -43,6 +45,9 @@ interface JobActivity {
   employer?: {
     name: string
     phone: string
+    email?: string
+    rating: number
+    reviews: number
   }
 }
 
@@ -54,7 +59,7 @@ interface MyPosting {
   applicants: number
   views: number
   date: string
-  pay: string
+  totalPay: number
   duration: string
   description: string
 }
@@ -66,22 +71,27 @@ export function MyActivityScreen() {
   const [selectedJob, setSelectedJob] = useState<JobActivity | null>(null)
   const [selectedPosting, setSelectedPosting] = useState<MyPosting | null>(null)
   const [showEditPosting, setShowEditPosting] = useState(false)
+  const [showContact, setShowContact] = useState(false)
 
   const currentJobs: JobActivity[] = [
     {
       id: "1",
       title: "카페 홀서빙",
-      company: "스타벅스 홍대점",
+      company: "스타벅스 잠실점",
       type: "matched",
       date: "오늘",
       startTime: "14:00",
       endTime: "18:00",
       duration: "4시간",
-      pay: "48,000원",
-      location: "홍익대학교 근처",
+      totalPay: 48000,
+      workTime: "오늘 14:00 ~ 18:00",
+      location: "잠실역 근처",
       employer: {
         name: "김사장",
         phone: "010-1234-5678",
+        email: "manager@starbucks.com",
+        rating: 4.8,
+        reviews: 32,
       },
     },
     {
@@ -91,9 +101,16 @@ export function MyActivityScreen() {
       type: "applied",
       date: "내일",
       duration: "3시간",
-      pay: "36,000원",
-      location: "신촌역 근처",
+      totalPay: 36000,
+      workTime: "내일 09:00 ~ 12:00",
+      location: "잠실새내역 근처",
       applicants: 5,
+      employer: {
+        name: "박대표",
+        phone: "010-9876-5432",
+        rating: 4.5,
+        reviews: 18,
+      },
     },
   ]
 
@@ -105,10 +122,17 @@ export function MyActivityScreen() {
       type: "completed",
       date: "2024.01.15",
       duration: "2시간",
-      pay: "25,000원",
-      location: "홍익대학교 근처",
+      totalPay: 25000,
+      workTime: "2024.01.15 14:00 ~ 16:00",
+      location: "잠실역 근처",
       rating: 5,
       review: "성실하고 친절하게 일해주셨어요!",
+      employer: {
+        name: "서연",
+        phone: "010-1111-2222",
+        rating: 4.9,
+        reviews: 24,
+      },
     },
     {
       id: "4",
@@ -117,10 +141,17 @@ export function MyActivityScreen() {
       type: "completed",
       date: "2024.01.12",
       duration: "6시간",
-      pay: "90,000원",
-      location: "강남역 근처",
+      totalPay: 90000,
+      workTime: "2024.01.12 10:00 ~ 16:00",
+      location: "잠실 롯데월드몰",
       rating: 4,
       review: "시간 약속을 잘 지키시네요.",
+      employer: {
+        name: "이팀장",
+        phone: "010-3333-4444",
+        rating: 4.6,
+        reviews: 15,
+      },
     },
   ]
 
@@ -133,7 +164,7 @@ export function MyActivityScreen() {
       applicants: 3,
       views: 24,
       date: "2024.01.14",
-      pay: "40,000원",
+      totalPay: 40000,
       duration: "2시간",
       description: "이케아 책장 조립을 도와주실 분을 찾습니다.",
     },
@@ -145,7 +176,7 @@ export function MyActivityScreen() {
       applicants: 1,
       views: 12,
       date: "2024.01.16",
-      pay: "30,000원",
+      totalPay: 30000,
       duration: "3시간",
       description: "집 청소를 도와주실 분을 찾습니다.",
     },
@@ -164,10 +195,8 @@ export function MyActivityScreen() {
   }
 
   const handleContact = (job: JobActivity) => {
-    toast({
-      title: "연락하기",
-      description: `${job.employer?.name}님과 채팅을 시작합니다.`,
-    })
+    setSelectedJob(job)
+    setShowContact(true)
   }
 
   const handleCancelApplication = (jobId: string) => {
@@ -401,6 +430,35 @@ export function MyActivityScreen() {
       <ScheduleManager isOpen={showSchedule} onClose={() => setShowSchedule(false)} />
 
       <EditPostingModal isOpen={showEditPosting} onClose={() => setShowEditPosting(false)} posting={selectedPosting} />
+
+      <ContactSystem
+        isOpen={showContact}
+        onClose={() => setShowContact(false)}
+        contact={
+          selectedJob
+            ? {
+                id: selectedJob.id,
+                name: selectedJob.employer?.name || "구인자",
+                jobTitle: selectedJob.title,
+                phone: selectedJob.employer?.phone,
+                email: selectedJob.employer?.email,
+                isOnline: true,
+                rating: selectedJob.employer?.rating || 4.5,
+                reviews: selectedJob.employer?.reviews || 10,
+              }
+            : {
+                id: "1",
+                name: "구인자",
+                jobTitle: "일자리",
+                isOnline: false,
+                rating: 4.5,
+                reviews: 10,
+              }
+        }
+        onChatOpen={() => {
+          setShowContact(false)
+        }}
+      />
     </div>
   )
 }
@@ -486,8 +544,9 @@ function JobCard({
             <CardDescription className="text-sm">{job.company}</CardDescription>
           </div>
           <div className="text-right">
-            <div className="font-bold text-blue-600">{job.pay}</div>
-            <div className="text-xs text-gray-500">{job.duration}</div>
+            <div className="font-bold text-blue-600">{job.totalPay.toLocaleString()}원</div>
+            <div className="text-xs text-gray-500">건당</div>
+            <div className="text-xs text-gray-400">{job.duration}</div>
           </div>
         </div>
       </CardHeader>
@@ -499,17 +558,10 @@ function JobCard({
               <span>{job.location}</span>
             </div>
             <div className="flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              <span>{job.date}</span>
+              <Clock className="h-3 w-3" />
+              <span>{job.workTime}</span>
             </div>
           </div>
-
-          {job.startTime && job.endTime && (
-            <div className="text-sm text-gray-600">
-              <Clock className="h-3 w-3 inline mr-1" />
-              {job.startTime} - {job.endTime}
-            </div>
-          )}
 
           {job.rating && (
             <div className="flex items-center gap-2">
@@ -536,7 +588,7 @@ function JobCard({
                     출근 체크
                   </Button>
                   <Button size="sm" variant="outline" className="bg-transparent" onClick={onContact}>
-                    <MessageCircle className="h-3 w-3 mr-1" />
+                    <Phone className="h-3 w-3 mr-1" />
                     연락
                   </Button>
                   <Button size="sm" variant="outline" className="bg-transparent" onClick={onNavigation}>
@@ -613,8 +665,9 @@ function PostingCard({
             <CardDescription className="text-sm">{posting.date}</CardDescription>
           </div>
           <div className="text-right">
-            <div className="font-bold text-blue-600">{posting.pay}</div>
-            <div className="text-xs text-gray-500">{posting.duration}</div>
+            <div className="font-bold text-blue-600">{posting.totalPay.toLocaleString()}원</div>
+            <div className="text-xs text-gray-500">건당</div>
+            <div className="text-xs text-gray-400">{posting.duration}</div>
           </div>
         </div>
       </CardHeader>

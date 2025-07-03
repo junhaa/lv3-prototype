@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { X, MapPin, Clock, Star, Shield, CheckCircle, AlertTriangle, Phone, MessageCircle, Heart } from "lucide-react"
+import { MapPin, Clock, Star, Shield, CheckCircle, AlertTriangle, Phone, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,9 +14,11 @@ interface JobDetailModalProps {
   isOpen: boolean
   onClose: () => void
   job: any
+  onChatOpen: () => void
+  onContactOpen: () => void
 }
 
-export function JobDetailModal({ isOpen, onClose, job }: JobDetailModalProps) {
+export function JobDetailModal({ isOpen, onClose, job, onChatOpen, onContactOpen }: JobDetailModalProps) {
   const [isApplying, setIsApplying] = useState(false)
   const [isFavorited, setIsFavorited] = useState(false)
 
@@ -46,10 +48,7 @@ export function JobDetailModal({ isOpen, onClose, job }: JobDetailModalProps) {
   }
 
   const handleContact = () => {
-    toast({
-      title: "연락하기",
-      description: "채팅방으로 이동합니다.",
-    })
+    onContactOpen()
   }
 
   return (
@@ -58,14 +57,9 @@ export function JobDetailModal({ isOpen, onClose, job }: JobDetailModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <span>일자리 상세</span>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={handleFavorite}>
-                <Heart className={`h-4 w-4 ${isFavorited ? "fill-red-500 text-red-500" : ""}`} />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={onClose}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            <Button variant="ghost" size="icon" onClick={handleFavorite}>
+              <Heart className={`h-4 w-4 ${isFavorited ? "fill-red-500 text-red-500" : ""}`} />
+            </Button>
           </DialogTitle>
         </DialogHeader>
 
@@ -83,8 +77,9 @@ export function JobDetailModal({ isOpen, onClose, job }: JobDetailModalProps) {
                   <CardDescription>{job.company}</CardDescription>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-blue-600">{job.pay}</div>
-                  <div className="text-sm text-gray-500">{job.duration}</div>
+                  <div className="text-2xl font-bold text-green-600">{job.totalPay.toLocaleString()}원</div>
+                  <div className="text-sm text-gray-500">건당</div>
+                  <div className="text-xs text-gray-400">{job.duration}</div>
                 </div>
               </div>
             </CardHeader>
@@ -98,7 +93,9 @@ export function JobDetailModal({ isOpen, onClose, job }: JobDetailModalProps) {
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-gray-400" />
-                  <span>오늘 14:00 ~ 16:00 ({job.duration})</span>
+                  <span>
+                    {job.workTime} ({job.duration})
+                  </span>
                 </div>
               </div>
             </CardContent>
@@ -145,14 +142,10 @@ export function JobDetailModal({ isOpen, onClose, job }: JobDetailModalProps) {
                 </div>
               </div>
 
-              <div className="flex gap-2 mt-3">
-                <Button variant="outline" size="sm" className="flex-1 bg-transparent" onClick={handleContact}>
-                  <MessageCircle className="h-4 w-4 mr-1" />
-                  채팅
-                </Button>
-                <Button variant="outline" size="sm" className="flex-1 bg-transparent">
+              <div className="mt-3">
+                <Button variant="outline" size="sm" className="w-full bg-transparent" onClick={handleContact}>
                   <Phone className="h-4 w-4 mr-1" />
-                  전화
+                  연락하기
                 </Button>
               </div>
             </CardContent>

@@ -9,7 +9,11 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
 
-export function ProfileScreen() {
+interface ProfileScreenProps {
+  onNavigateToActivity?: () => void
+}
+
+export function ProfileScreen({ onNavigateToActivity }: ProfileScreenProps) {
   const [userType, setUserType] = useState<"worker" | "employer">("worker")
 
   const workerStats = {
@@ -23,7 +27,7 @@ export function ProfileScreen() {
   const recentJobs = [
     {
       title: "카페 홀서빙",
-      company: "스타벅스 홍대점",
+      company: "스타벅스 잠실점",
       date: "2024.01.15",
       pay: "24,000원",
       rating: 5,
@@ -226,7 +230,7 @@ export function ProfileScreen() {
           <Button variant="outline" className="w-full bg-transparent">
             프로필 수정
           </Button>
-          <Button variant="outline" className="w-full bg-transparent">
+          <Button variant="outline" className="w-full bg-transparent" onClick={onNavigateToActivity}>
             내 활동 내역
           </Button>
           <Button variant="outline" className="w-full bg-transparent">
